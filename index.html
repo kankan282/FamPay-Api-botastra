@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FamPay Payment Gateway - API Documentation</title>
+<meta name="description" content="FamPay UPI payment gateway: logo-branded QR generation and Gmail IMAP payment verification over simple GET URLs.">
+<style>
+:root{
+  --bg:#06080f; --bg2:#0c1018; --card:#111827; --card-hover:#151d2e;
+  --border:#1e293b; --border-hover:#334155;
+  --accent:#6366f1; --accent-light:#818cf8;
+  --success:#10b981; --warning:#f59e0b; --danger:#ef4444; --info:#06b6d4; --purple:#a855f7;
+  --text:#f1f5f9; --text2:#94a3b8; --muted:#64748b;
+  --mono:'SF Mono','Fira Code','Cascadia Code',Consolas,ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.65;font-size:15px;-webkit-font-smoothing:antialiased}
+a{color:var(--accent-light);text-decoration:none}
+a:hover{color:#a5b4fc}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+/* nav */
+nav{position:sticky;top:0;z-index:50;background:rgba(6,8,15,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:66px;gap:16px}
+.logo{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:-.02em;color:var(--text)}
+.logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--purple));display:grid;place-items:center;color:#fff}
+.logo small{display:block;font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-links a{color:var(--text2);font-size:14px;font-weight:500;padding:8px 12px;border-radius:9px;transition:.15s}
+.nav-links a:hover{color:var(--text);background:var(--card)}
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:11px;font-size:14px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:.15s;font-family:inherit}
+.btn:hover{border-color:var(--border-hover);background:var(--card-hover);color:var(--text)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-light);border-color:var(--accent-light);color:#fff}
+.btn-sm{padding:7px 11px;font-size:12.5px;border-radius:9px}
+/* hero */
+header.hero{position:relative;overflow:hidden;padding:88px 0 64px;text-align:center}
+header.hero:before{content:"";position:absolute;inset:-40% 0 auto 0;height:560px;background:radial-gradient(600px 320px at 50% 30%,rgba(99,102,241,.22),transparent 70%),radial-gradient(520px 300px at 78% 8%,rgba(168,85,247,.16),transparent 70%);pointer-events:none}
+.hero-inner{position:relative}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.32);color:#6ee7b7;font-size:12.5px;font-weight:600;letter-spacing:.03em}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 0 0 rgba(16,185,129,.6);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.6)}70%{box-shadow:0 0 0 9px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+h1{font-size:clamp(34px,6vw,56px);line-height:1.08;letter-spacing:-.035em;margin:22px 0 16px;font-weight:800;
+   background:linear-gradient(135deg,#f8fafc 15%,#a5b4fc 55%,#c4b5fd 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--text2);font-size:clamp(15px,2vw,17.5px);max-width:660px;margin:0 auto 30px}
+.hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:44px 0 8px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:.15s}
+.stat:hover{border-color:var(--border-hover);background:var(--card-hover);transform:translateY(-2px)}
+.stat b{display:block;font-size:27px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#e2e8f0,#818cf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+/* sections */
+section{padding:56px 0}
+.sec-head{margin-bottom:30px}
+.sec-tag{display:inline-flex;align-items:center;gap:7px;color:var(--accent-light);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px}
+h2{font-size:clamp(23px,3.4vw,31px);letter-spacing:-.025em;font-weight:750}
+.sec-head p{color:var(--text2);margin-top:8px;max-width:640px}
+/* flow */
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:16px}
+.flow-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px 20px 20px;transition:.15s}
+.flow-card:hover{border-color:var(--border-hover);background:var(--card-hover);transform:translateY(-3px)}
+.flow-num{position:absolute;top:-13px;left:20px;width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--purple));display:grid;place-items:center;font-size:12.5px;font-weight:800;color:#fff}
+.flow-ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin-bottom:14px}
+.flow-card h3{font-size:16px;margin-bottom:6px;letter-spacing:-.01em}
+.flow-card p{color:var(--text2);font-size:13.5px}
+/* endpoints */
+.ep{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:14px;overflow:hidden;transition:.15s}
+.ep:hover{border-color:var(--border-hover)}
+.ep-head{display:flex;align-items:center;gap:14px;padding:17px 20px;cursor:pointer;user-select:none}
+.ep-head:hover{background:var(--card-hover)}
+.method{flex-shrink:0;padding:4px 10px;border-radius:7px;background:rgba(16,185,129,.14);color:#6ee7b7;font-size:11px;font-weight:800;letter-spacing:.06em;border:1px solid rgba(16,185,129,.3)}
+.ep-path{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text)}
+.ep-desc{color:var(--muted);font-size:13px;margin-left:auto;text-align:right}
+.chev{flex-shrink:0;color:var(--muted);transition:transform .2s}
+.ep.open .chev{transform:rotate(180deg)}
+.ep-body{display:none;padding:0 20px 22px;border-top:1px solid var(--border)}
+.ep.open .ep-body{display:block}
+.block-label{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;margin:20px 0 9px;display:flex;align-items:center;gap:7px}
+.url-box{display:flex;align-items:flex-start;gap:10px;background:#0b1220;border:1px solid var(--border);border-radius:11px;padding:13px 14px;font-family:var(--mono);font-size:13px;word-break:break-all;line-height:1.75}
+.url-box .u{flex:1}
+.p-key{color:#fbbf24}
+.p-val{color:#67e8f9}
+.p-path{color:#a5b4fc}
+pre{background:#0b1220;border:1px solid var(--border);border-radius:11px;padding:15px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:#cbd5e1}
+pre .k{color:#a5b4fc}pre .s{color:#6ee7b7}pre .n{color:#fbbf24}pre .b{color:#f472b6}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px}
+th{text-align:left;padding:10px 13px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border)}
+td{padding:11px 13px;border-bottom:1px solid rgba(30,41,59,.6);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td code{font-family:var(--mono);font-size:12.5px;color:#fbbf24;background:rgba(251,191,36,.09);padding:2px 6px;border-radius:5px}
+.req{color:#fca5a5;font-size:11.5px;font-weight:700;text-transform:uppercase}
+.opt{color:var(--muted);font-size:11.5px;font-weight:700;text-transform:uppercase}
+.table-scroll{overflow-x:auto}
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+/* notes */
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:14px}
+.note{display:flex;gap:13px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:.15s}
+.note:hover{border-color:var(--border-hover);background:var(--card-hover)}
+.note-ico{flex-shrink:0;width:36px;height:36px;border-radius:10px;display:grid;place-items:center}
+.note h4{font-size:14px;margin-bottom:3px}
+.note p{color:var(--text2);font-size:13px}
+footer{border-top:1px solid var(--border);padding:34px 0;margin-top:30px}
+.foot-in{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+.copy-btn{flex-shrink:0}
+@media(max-width:720px){.ep-desc{display:none}.nav-links a:not(.btn){display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-in">
+    <a class="logo" href="#top">
+      <span class="logo-mark"><i data-lucide="credit-card" style="width:19px;height:19px"></i></span>
+      <span>FamPay Gateway<small>UPI API v2.0</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="#flow">Flow</a>
+      <a href="#api">API</a>
+      <a class="btn btn-sm" href="https://t.me/lazzy_guy" target="_blank" rel="noopener"><i data-lucide="send" style="width:14px;height:14px"></i> Telegram</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap hero-inner">
+    <span class="pill"><span class="dot"></span> System Online</span>
+    <h1>UPI QR payments,<br>verified from your inbox</h1>
+    <p class="lead">Generate FamPay-branded UPI QR codes with the logo embedded in the centre, then confirm every rupee by scanning the merchant Gmail inbox over IMAP. Four plain GET URLs, two layers of API keys, no SDK required.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#api"><i data-lucide="book-open" style="width:16px;height:16px"></i> View Docs</a>
+      <a class="btn" href="https://t.me/lazzy_guy" target="_blank" rel="noopener"><i data-lucide="message-circle" style="width:16px;height:16px"></i> Contact Dev</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>4</b><span>Endpoints</span></div>
+      <div class="stat"><b>15m</b><span>QR Expiry</span></div>
+      <div class="stat"><b>2</b><span>Auth Layers</span></div>
+      <div class="stat"><b>GET</b><span>Simple URLs</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="flow">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-tag"><i data-lucide="workflow" style="width:14px;height:14px"></i> How it works</span>
+      <h2>Four steps from key to confirmation</h2>
+      <p>Every step is a single URL call. Responses are JSON, errors carry proper HTTP status codes.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-card">
+        <span class="flow-num">1</span>
+        <div class="flow-ico" style="background:rgba(168,85,247,.13);color:var(--purple)"><i data-lucide="key" style="width:20px;height:20px"></i></div>
+        <h3>Create master key</h3>
+        <p>Generate a 6 character master API key from the admin panel or the create-key endpoint.</p>
+      </div>
+      <div class="flow-card">
+        <span class="flow-num">2</span>
+        <div class="flow-ico" style="background:rgba(6,182,212,.13);color:var(--info)"><i data-lucide="mail" style="width:20px;height:20px"></i></div>
+        <h3>Connect Gmail</h3>
+        <p>Log in once with a Google App Password. The gateway verifies IMAP access and returns a gmail key.</p>
+      </div>
+      <div class="flow-card">
+        <span class="flow-num">3</span>
+        <div class="flow-ico" style="background:rgba(99,102,241,.13);color:var(--accent-light)"><i data-lucide="qr-code" style="width:20px;height:20px"></i></div>
+        <h3>Generate QR</h3>
+        <p>Pass a UPI ID and amount. You get an order ID plus a logo-branded QR as URL and base64.</p>
+      </div>
+      <div class="flow-card">
+        <span class="flow-num">4</span>
+        <div class="flow-ico" style="background:rgba(16,185,129,.13);color:var(--success)"><i data-lucide="circle-check" style="width:20px;height:20px"></i></div>
+        <h3>Verify payment</h3>
+        <p>Poll the verify endpoint. The inbox is scanned for a matching credit and the UTR is returned.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="api">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-tag"><i data-lucide="terminal" style="width:14px;height:14px"></i> API reference</span>
+      <h2>Endpoints</h2>
+      <p>All endpoints accept GET and POST. Parameters may be sent in the query string, as form fields or as JSON.</p>
+    </div>
+
+    <!-- create-key -->
+    <article class="ep">
+      <div class="ep-head" onclick="toggleEp(this)">
+        <span class="method">GET / POST</span>
+        <span class="ep-path">/create-key.php</span>
+        <span class="ep-desc">Issue a master API key</span>
+        <i data-lucide="chevron-down" class="chev" style="width:18px;height:18px"></i>
+      </div>
+      <div class="ep-body">
+        <div class="block-label"><i data-lucide="link" style="width:13px;height:13px"></i> Direct URL</div>
+        <div class="url-box">
+          <span class="u"><span class="p-path">/create-key.php</span>?<span class="p-key">admin_password</span>=<span class="p-val">kankan201028</span>&amp;<span class="p-key">key_name</span>=<span class="p-val">MyApp</span></span>
+          <button class="btn btn-sm copy-btn" onclick="copyUrl(this,'/create-key.php?admin_password=kankan201028&key_name=MyApp')"><i data-lucide="copy" style="width:13px;height:13px"></i> Copy</button>
+        </div>
+        <div class="block-label"><i data-lucide="list" style="width:13px;height:13px"></i> Parameters</div>
+        <div class="table-scroll"><table>
+          <thead><tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>admin_password</code></td><td>string</td><td><span class="req">Required</span></td><td>Administrator password configured in the environment.</td></tr>
+            <tr><td><code>key_name</code></td><td>string</td><td><span class="opt">Optional</span></td><td>Label shown in the admin panel. Defaults to "Untitled".</td></tr>
+          </tbody>
+        </table></div>
+        <div class="block-label"><i data-lucide="circle-check-big" style="width:13px;height:13px"></i> Success 201</div>
+<pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"api_key"</span>: <span class="s">"Ab3xKm"</span>,
+    <span class="k">"key_name"</span>: <span class="s">"MyApp"</span>,
+    <span class="k">"status"</span>: <span class="s">"active"</span>,
+    <span class="k">"created_at"</span>: <span class="s">"2026-09-05 12:00:00"</span>
+  }
+}</pre>
+        <div class="block-label"><i data-lucide="triangle-alert" style="width:13px;height:13px"></i> Error 401</div>
+<pre>{
+  <span class="k">"success"</span>: <span class="b">false</span>,
+  <span class="k">"error"</span>: { <span class="k">"code"</span>: <span class="s">"UNAUTHORIZED"</span>, <span class="k">"message"</span>: <span class="s">"Invalid admin password."</span> }
+}</pre>
+      </div>
+    </article>
+
+    <!-- qr -->
+    <article class="ep">
+      <div class="ep-head" onclick="toggleEp(this)">
+        <span class="method">GET / POST</span>
+        <span class="ep-path">/qr.php</span>
+        <span class="ep-desc">Create order + logo QR</span>
+        <i data-lucide="chevron-down" class="chev" style="width:18px;height:18px"></i>
+      </div>
+      <div class="ep-body">
+        <div class="block-label"><i data-lucide="link" style="width:13px;height:13px"></i> Direct URL</div>
+        <div class="url-box">
+          <span class="u"><span class="p-path">/qr.php</span>?<span class="p-key">upi</span>=<span class="p-val">kankan1@fam</span>&amp;<span class="p-key">amount</span>=<span class="p-val">100</span>&amp;<span class="p-key">api_key</span>=<span class="p-val">Ab3xKm</span></span>
+          <button class="btn btn-sm copy-btn" onclick="copyUrl(this,'/qr.php?upi=kankan1@fam&amount=100&api_key=Ab3xKm')"><i data-lucide="copy" style="width:13px;height:13px"></i> Copy</button>
+        </div>
+        <div class="block-label"><i data-lucide="list" style="width:13px;height:13px"></i> Parameters</div>
+        <div class="table-scroll"><table>
+          <thead><tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>upi</code></td><td>string</td><td><span class="req">Required</span></td><td>Receiver VPA, for example <code>kankan1@fam</code>.</td></tr>
+            <tr><td><code>amount</code></td><td>number</td><td><span class="req">Required</span></td><td>1 to 100000 INR, up to two decimals.</td></tr>
+            <tr><td><code>api_key</code></td><td>string</td><td><span class="req">Required</span></td><td>6 character master key.</td></tr>
+            <tr><td><code>note</code></td><td>string</td><td><span class="opt">Optional</span></td><td>Custom transaction note (max 60 chars).</td></tr>
+            <tr><td><code>logo</code></td><td>0 / 1</td><td><span class="opt">Optional</span></td><td>Set to 0 for a plain QR without the FamPay logo.</td></tr>
+            <tr><td><code>format</code></td><td>png</td><td><span class="opt">Optional</span></td><td>With <code>order_id</code>, streams the stored PNG instead of JSON.</td></tr>
+          </tbody>
+        </table></div>
+        <div class="block-label"><i data-lucide="circle-check-big" style="width:13px;height:13px"></i> Success 201</div>
+<pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"order_id"</span>: <span class="s">"FAM20260905A1B2C3D4"</span>,
+    <span class="k">"upi_id"</span>: <span class="s">"kankan1@fam"</span>,
+    <span class="k">"amount"</span>: <span class="n">100</span>,
+    <span class="k">"status"</span>: <span class="s">"pending"</span>,
+    <span class="k">"qr_code"</span>: {
+      <span class="k">"image_url"</span>: <span class="s">"https://your-app.onrender.com/qr.php?order_id=...&amp;format=png"</span>,
+      <span class="k">"base64"</span>: <span class="s">"data:image/png;base64,iVBORw0KG..."</span>,
+      <span class="k">"upi_deeplink"</span>: <span class="s">"upi://pay?pa=kankan1%40fam&amp;am=100.00..."</span>,
+      <span class="k">"has_fampay_logo"</span>: <span class="b">true</span>,
+      <span class="k">"error_correction"</span>: <span class="s">"H"</span>
+    },
+    <span class="k">"expires_in_minutes"</span>: <span class="n">15</span>,
+    <span class="k">"expires_at"</span>: <span class="s">"2026-09-05 12:15:00"</span>,
+    <span class="k">"verify_url"</span>: <span class="s">"https://your-app.onrender.com/verify.php?order_id=...&amp;api_key=...&amp;gmail_key=..."</span>
+  }
+}</pre>
+        <div class="block-label"><i data-lucide="triangle-alert" style="width:13px;height:13px"></i> Error 422</div>
+<pre>{
+  <span class="k">"success"</span>: <span class="b">false</span>,
+  <span class="k">"error"</span>: { <span class="k">"code"</span>: <span class="s">"INVALID_UPI"</span>, <span class="k">"message"</span>: <span class="s">"Invalid UPI ID format. Example: kankan1@fam"</span> }
+}</pre>
+      </div>
+    </article>
+
+    <!-- login -->
+    <article class="ep">
+      <div class="ep-head" onclick="toggleEp(this)">
+        <span class="method">GET / POST</span>
+        <span class="ep-path">/login.php</span>
+        <span class="ep-desc">Connect a Gmail inbox</span>
+        <i data-lucide="chevron-down" class="chev" style="width:18px;height:18px"></i>
+      </div>
+      <div class="ep-body">
+        <div class="block-label"><i data-lucide="link" style="width:13px;height:13px"></i> Direct URL</div>
+        <div class="url-box">
+          <span class="u"><span class="p-path">/login.php</span>?<span class="p-key">gmail</span>=<span class="p-val">user@gmail.com</span>&amp;<span class="p-key">app_password</span>=<span class="p-val">abcdefghijklmnop</span>&amp;<span class="p-key">api_key</span>=<span class="p-val">Ab3xKm</span></span>
+          <button class="btn btn-sm copy-btn" onclick="copyUrl(this,'/login.php?gmail=user@gmail.com&app_password=abcdefghijklmnop&api_key=Ab3xKm')"><i data-lucide="copy" style="width:13px;height:13px"></i> Copy</button>
+        </div>
+        <div class="block-label"><i data-lucide="list" style="width:13px;height:13px"></i> Parameters</div>
+        <div class="table-scroll"><table>
+          <thead><tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>gmail</code></td><td>string</td><td><span class="req">Required</span></td><td>Inbox that receives the UPI credit alerts.</td></tr>
+            <tr><td><code>app_password</code></td><td>string</td><td><span class="req">Required</span></td><td>16 character Google App Password (spaces are ignored).</td></tr>
+            <tr><td><code>api_key</code></td><td>string</td><td><span class="req">Required</span></td><td>Master key issued by create-key.</td></tr>
+          </tbody>
+        </table></div>
+        <div class="block-label"><i data-lucide="circle-check-big" style="width:13px;height:13px"></i> Success 201</div>
+<pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"gmail_key"</span>: <span class="s">"Xt7pQw"</span>,
+    <span class="k">"gmail"</span>: <span class="s">"user@gmail.com"</span>,
+    <span class="k">"status"</span>: <span class="s">"active"</span>,
+    <span class="k">"inbox_messages"</span>: <span class="n">1284</span>
+  }
+}</pre>
+        <div class="block-label"><i data-lucide="triangle-alert" style="width:13px;height:13px"></i> Error 401</div>
+<pre>{
+  <span class="k">"success"</span>: <span class="b">false</span>,
+  <span class="k">"error"</span>: { <span class="k">"code"</span>: <span class="s">"IMAP_LOGIN_FAILED"</span>, <span class="k">"message"</span>: <span class="s">"Gmail rejected the credentials..."</span> }
+}</pre>
+      </div>
+    </article>
+
+    <!-- verify -->
+    <article class="ep">
+      <div class="ep-head" onclick="toggleEp(this)">
+        <span class="method">GET / POST</span>
+        <span class="ep-path">/verify.php</span>
+        <span class="ep-desc">Check payment status</span>
+        <i data-lucide="chevron-down" class="chev" style="width:18px;height:18px"></i>
+      </div>
+      <div class="ep-body">
+        <div class="block-label"><i data-lucide="link" style="width:13px;height:13px"></i> Direct URL</div>
+        <div class="url-box">
+          <span class="u"><span class="p-path">/verify.php</span>?<span class="p-key">order_id</span>=<span class="p-val">FAM20260905A1B2C3D4</span>&amp;<span class="p-key">api_key</span>=<span class="p-val">Ab3xKm</span>&amp;<span class="p-key">gmail_key</span>=<span class="p-val">Xt7pQw</span></span>
+          <button class="btn btn-sm copy-btn" onclick="copyUrl(this,'/verify.php?order_id=FAM20260905A1B2C3D4&api_key=Ab3xKm&gmail_key=Xt7pQw')"><i data-lucide="copy" style="width:13px;height:13px"></i> Copy</button>
+        </div>
+        <div class="block-label"><i data-lucide="list" style="width:13px;height:13px"></i> Parameters</div>
+        <div class="table-scroll"><table>
+          <thead><tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>order_id</code></td><td>string</td><td><span class="req">Required</span></td><td>Order returned by the QR endpoint.</td></tr>
+            <tr><td><code>api_key</code></td><td>string</td><td><span class="req">Required</span></td><td>Master key.</td></tr>
+            <tr><td><code>gmail_key</code></td><td>string</td><td><span class="req">Required</span></td><td>Gmail key from the login endpoint. Not needed once the order is already settled.</td></tr>
+          </tbody>
+        </table></div>
+        <div class="block-label"><i data-lucide="circle-check-big" style="width:13px;height:13px"></i> Success 200</div>
+<pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"order_id"</span>: <span class="s">"FAM20260905A1B2C3D4"</span>,
+    <span class="k">"status"</span>: <span class="s">"SUCCESS"</span>,
+    <span class="k">"payment_found"</span>: <span class="b">true</span>,
+    <span class="k">"amount"</span>: <span class="n">100</span>,
+    <span class="k">"payment_details"</span>: {
+      <span class="k">"utr"</span>: <span class="s">"ABC123456789"</span>,
+      <span class="k">"payer_name"</span>: <span class="s">"John Doe"</span>,
+      <span class="k">"payer_upi"</span>: <span class="s">"john@ybl"</span>,
+      <span class="k">"payment_date"</span>: <span class="s">"2026-09-05 12:05:00"</span>,
+      <span class="k">"verified_at"</span>: <span class="s">"2026-09-05 12:06:30"</span>
+    }
+  }
+}</pre>
+        <div class="block-label"><i data-lucide="triangle-alert" style="width:13px;height:13px"></i> Pending 200 / Expired 410</div>
+<pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"data"</span>: { <span class="k">"status"</span>: <span class="s">"PENDING"</span>, <span class="k">"payment_found"</span>: <span class="b">false</span>, <span class="k">"seconds_remaining"</span>: <span class="n">640</span> }
+}
+
+{
+  <span class="k">"success"</span>: <span class="b">false</span>,
+  <span class="k">"error"</span>: { <span class="k">"code"</span>: <span class="s">"ORDER_EXPIRED"</span>, <span class="k">"message"</span>: <span class="s">"This order expired after 15 minutes."</span> }
+}</pre>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-tag"><i data-lucide="octagon-alert" style="width:14px;height:14px"></i> Errors</span>
+      <h2>Status codes</h2>
+    </div>
+    <div class="table-card table-scroll">
+      <table>
+        <thead><tr><th>HTTP</th><th>Status</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>200</code></td><td>OK</td><td>Request handled. Check <code>data.status</code> for PENDING or SUCCESS.</td></tr>
+          <tr><td><code>201</code></td><td>Created</td><td>Order, master key or Gmail connection created.</td></tr>
+          <tr><td><code>400</code></td><td>Bad Request</td><td>A required parameter is missing.</td></tr>
+          <tr><td><code>401</code></td><td>Unauthorized</td><td>Missing or invalid API key, Gmail key or admin password.</td></tr>
+          <tr><td><code>403</code></td><td>Forbidden</td><td>The key exists but has been disabled in the admin panel.</td></tr>
+          <tr><td><code>404</code></td><td>Not Found</td><td>Order ID does not exist.</td></tr>
+          <tr><td><code>409</code></td><td>Conflict</td><td>Order already failed, or stored credentials must be refreshed.</td></tr>
+          <tr><td><code>410</code></td><td>Gone</td><td>Order expired after the 15 minute window.</td></tr>
+          <tr><td><code>422</code></td><td>Unprocessable</td><td>Validation failed: UPI, amount, e-mail or order ID format.</td></tr>
+          <tr><td><code>429</code></td><td>Too Many Requests</td><td>Rate limit exceeded. Honour the <code>Retry-After</code> header.</td></tr>
+          <tr><td><code>500</code></td><td>Server Error</td><td>Unexpected failure. Details are written to the server log.</td></tr>
+          <tr><td><code>502</code></td><td>Bad Gateway</td><td>QR rendering or the IMAP scan failed.</td></tr>
+          <tr><td><code>503</code></td><td>Unavailable</td><td>Database unreachable or the IMAP extension is missing.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-tag"><i data-lucide="info" style="width:14px;height:14px"></i> Good to know</span>
+      <h2>Important notes</h2>
+    </div>
+    <div class="notes">
+      <div class="note">
+        <span class="note-ico" style="background:rgba(99,102,241,.13);color:var(--accent-light)"><i data-lucide="qr-code" style="width:18px;height:18px"></i></span>
+        <div><h4>Logo QR</h4><p>QR codes render at error correction level H with the FamPay mark on a white badge in the centre, so they stay scannable.</p></div>
+      </div>
+      <div class="note">
+        <span class="note-ico" style="background:rgba(245,158,11,.13);color:var(--warning)"><i data-lucide="timer" style="width:18px;height:18px"></i></span>
+        <div><h4>15 minute window</h4><p>Pending orders switch to expired automatically. Generate a fresh QR for a retry.</p></div>
+      </div>
+      <div class="note">
+        <span class="note-ico" style="background:rgba(168,85,247,.13);color:var(--purple)"><i data-lucide="key-round" style="width:18px;height:18px"></i></span>
+        <div><h4>Two key layers</h4><p>The master key authorises the app; the Gmail key selects which inbox is scanned during verification.</p></div>
+      </div>
+      <div class="note">
+        <span class="note-ico" style="background:rgba(6,182,212,.13);color:var(--info)"><i data-lucide="mail-check" style="width:18px;height:18px"></i></span>
+        <div><h4>App Passwords only</h4><p>Gmail requires 2-Step Verification plus a 16 character App Password. Normal passwords are rejected.</p></div>
+      </div>
+      <div class="note">
+        <span class="note-ico" style="background:rgba(16,185,129,.13);color:var(--success)"><i data-lucide="shield-check" style="width:18px;height:18px"></i></span>
+        <div><h4>Amount matched</h4><p>A credit is accepted only when the amount matches to the paisa and the UTR has not settled another order.</p></div>
+      </div>
+      <div class="note">
+        <span class="note-ico" style="background:rgba(239,68,68,.13);color:var(--danger)"><i data-lucide="gauge" style="width:18px;height:18px"></i></span>
+        <div><h4>Rate limits</h4><p>60 requests per minute per IP by default; QR creation is capped at 30 and logins at 10.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <span>FamPay Payment Gateway v2.0 &middot; PHP 8.1 &middot; PostgreSQL &middot; Deployed on Render</span>
+    <a class="btn btn-sm" href="https://t.me/lazzy_guy" target="_blank" rel="noopener"><i data-lucide="send" style="width:14px;height:14px"></i> @lazzy_guy</a>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+function renderIcons(){ if (window.lucide && typeof window.lucide.createIcons === 'function') { window.lucide.createIcons(); } }
+document.addEventListener('DOMContentLoaded', renderIcons);
+window.addEventListener('load', renderIcons);
+
+function toggleEp(head){ head.parentElement.classList.toggle('open'); }
+
+function copyUrl(btn, path){
+  var full = window.location.origin + path;
+  var done = function(){
+    var original = btn.innerHTML;
+    btn.innerHTML = '<i data-lucide="check" style="width:13px;height:13px"></i> Copied';
+    renderIcons();
+    setTimeout(function(){ btn.innerHTML = original; renderIcons(); }, 1500);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(full).then(done).catch(function(){ fallbackCopy(full, done); });
+  } else { fallbackCopy(full, done); }
+}
+function fallbackCopy(text, cb){
+  var ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta); cb();
+}
+// open the first endpoint by default
+document.addEventListener('DOMContentLoaded', function(){
+  var first = document.querySelector('.ep');
+  if (first) first.classList.add('open');
+});
+</script>
+</body>
+</html>
